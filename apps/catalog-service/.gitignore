@@ -1,0 +1,4 @@
+# /apps/user-service/.gitignore
+
+# Never commit local cryptographic certificates to source control
+certs/

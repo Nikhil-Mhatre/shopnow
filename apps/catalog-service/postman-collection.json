@@ -1,0 +1,238 @@
+{
+	"info": {
+		"_postman_id": "c8b4dfa2-2b63-42eb-bb97-b86db11096cf",
+		"name": "Catalog Service API Matrix (v2)",
+		"description": "Comprehensive operational Postman suite testing suite tracking both consumer search profiles and administrative mutation operations for the high-scale read-optimized Catalog Microservice. Includes automated Azure SAS token handoffs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Public Consumer Routes",
+			"description": "High-velocity unauthenticated lookups routing clean read executions.",
+			"item": [
+				{
+					"name": "Get Homepage Layout",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/catalog/homepage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"homepage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Faceted Full-Text Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/catalog/search?q=wireless&category=Smartphones&minPrice=500&maxPrice=1500",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "wireless"
+								},
+								{
+									"key": "category",
+									"value": "Smartphones"
+								},
+								{
+									"key": "minPrice",
+									"value": "500"
+								},
+								{
+									"key": "maxPrice",
+									"value": "1500"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Content-Based Similar Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/catalog/products/:productId/similar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"products",
+								":productId",
+								"similar"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "65f8a3c2b1a4c92db871e411"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Secured Administrative Routes",
+			"description": "Write operations requiring edge network proxy authentication verification flags injection.",
+			"item": [
+				{
+					"name": "1. Request Shared Access Signature (SAS) Media Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if(response.uploadUrl) {",
+									"    pm.collectionVariables.set(\"azureUploadUrl\", response.uploadUrl);",
+									"    pm.collectionVariables.set(\"azurePublicAssetUrl\", response.publicAssetUrl);",
+									"    console.log(\"Successfully captured Azure Upload URL to variables.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Role",
+								"value": "admin",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contentType\": \"image/webp\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/catalog/admin/media-upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"admin",
+								"media-upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Upload Image to Azure Blob Storage",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-ms-blob-type",
+								"value": "BlockBlob",
+								"type": "text",
+								"description": "Required by Azure to identify the blob storage format."
+							},
+							{
+								"key": "Content-Type",
+								"value": "image/webp",
+								"type": "text",
+								"description": "Must match the contentType requested in the SAS generation step."
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": ""
+							}
+						},
+						"url": {
+							"raw": "{{azureUploadUrl}}",
+							"host": [
+								"{{azureUploadUrl}}"
+							]
+						},
+						"description": "Executes the PUT request directly to Azure using the captured SAS URL variable."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Ingest Product Entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-User-Role",
+								"value": "admin",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Pro Wireless Headset Elite v26\",\n    \"slug\": \"pro-wireless-headset-elite-v26\",\n    \"description\": \"Studio-grade noise-cancelling open-back acoustic array monitoring peripheral configuration ecosystem.\",\n    \"price\": 349.99,\n    \"sku\": \"AUDIO-HDST-ELITE26\",\n    \"categories\": [\"Electronics\", \"Audio\", \"Accessories\"],\n    \"images\": [\n        \"{{azurePublicAssetUrl}}\"\n    ],\n    \"attributes\": [\n        { \"name\": \"Connectivity\", \"value\": \"Bluetooth 5.4\" },\n        { \"name\": \"Battery Life\", \"value\": \"40 Hours\" },\n        { \"name\": \"Color\", \"value\": \"Matte Obsidian\" }\n    ],\n    \"isFeatured\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/catalog/admin/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Saves the product utilizing the public URL captured from the SAS creation step."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "azureUploadUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "azurePublicAssetUrl",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

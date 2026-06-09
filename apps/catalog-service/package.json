@@ -1,0 +1,39 @@
+{
+  "name": "@repo/catalog-service",
+  "description": "High-scale read-optimized Catalog Microservice",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx --env-file=.env --watch src/index.ts",
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@azure/storage-blob": "^12.32.0",
+    "@repo/shared-types": "workspace:*",
+    "amqplib": "^2.0.1",
+    "express": "^4.21.1",
+    "mongoose": "^8.8.0",
+    "morgan": "^1.11.0",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.19.0",
+    "zod": "^4.4.3",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@repo/tsconfig-config": "workspace:*",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^22.9.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/supertest": "^7.2.0",
+    "mongodb-memory-server": "^11.2.0",
+    "supertest": "^7.2.2",
+    "vitest": "^2.1.9"
+  }
+}
