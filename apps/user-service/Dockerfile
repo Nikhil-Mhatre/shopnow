@@ -13,7 +13,7 @@ RUN npm install -g turbo
 COPY . .
 
 # Extract only the user-service and its internal dependencies (shared-types)
-RUN turbo prune user-service --docker
+RUN turbo prune @repo/user-service --docker
 
 # ==========================================
 # STAGE 2: INSTALL & BUILD
@@ -38,7 +38,7 @@ RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 
 # Build the project and its dependencies (shared-types -> user-service)
-RUN pnpm turbo run build --filter=user-service
+RUN pnpm turbo run build --filter=@repo/user-service
 
 # ==========================================
 # STAGE 3: RUNNER (Production Image)
@@ -58,7 +58,7 @@ USER expressjs
 COPY --from=installer --chown=expressjs:nodejs /app .
 
 # Expose the application port
-EXPOSE 3001
+EXPOSE 3002
 
 # Start the compiled User Service application
 CMD ["node", "apps/user-service/dist/index.js"]
