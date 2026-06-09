@@ -30,6 +30,10 @@ static_resources:
                             prefix: "/api/profile"
                           route:
                             cluster: user_service
+                        - match:
+                            prefix: "/api/catalog"
+                          route:
+                            cluster: catalog_service
                 http_filters:
                   - name: envoy.filters.http.router
                     typed_config:
@@ -48,3 +52,16 @@ static_resources:
                     socket_address:
                       address: user-service # This matches the container name in docker-compose
                       port_value: 3001
+    - name: catalog_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS # Uses Docker's internal DNS to find the container
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: catalog_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: catalog-service # This matches the container name in docker-compose
+                      port_value: 3002

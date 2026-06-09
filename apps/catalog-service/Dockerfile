@@ -1,5 +1,5 @@
 # ==========================================
-# STAGE 1: PRUNE (Extract only user-service)
+# STAGE 1: PRUNE (Extract only catalog-service)
 # ==========================================
 FROM node:22-alpine AS builder
 # Add libc6-compat for turbo compatibility on alpine
@@ -12,8 +12,8 @@ RUN npm install -g turbo
 # Copy the entire monorepo
 COPY . .
 
-# Extract only the user-service and its internal dependencies (shared-types)
-RUN turbo prune @repo/user-service --docker
+# Extract only the catalog-service and its internal dependencies (shared-types)
+RUN turbo prune @repo/catalog-service --docker
 
 # ==========================================
 # STAGE 2: INSTALL & BUILD
@@ -37,8 +37,8 @@ RUN pnpm install --frozen-lockfile
 # Copy the actual source code of the isolated packages
 COPY --from=builder /app/out/full/ .
 
-# Build the project and its dependencies (shared-types -> user-service)
-RUN pnpm turbo run build --filter=@repo/user-service
+# Build the project and its dependencies (shared-types -> catalog-service)
+RUN pnpm turbo run build --filter=@repo/catalog-service
 
 # ==========================================
 # STAGE 3: RUNNER (Production Image)
@@ -58,7 +58,7 @@ USER expressjs
 COPY --from=installer --chown=expressjs:nodejs /app .
 
 # Expose the application port
-EXPOSE 3002
+EXPOSE 3001
 
 # Start the compiled User Service application
-CMD ["node", "apps/user-service/dist/index.js"]
+CMD ["node", "apps/catalog-service/dist/index.js"]
