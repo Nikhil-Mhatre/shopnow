@@ -1,0 +1,28 @@
+{
+  "name": "@repo/shared-types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./user-service": {
+      "types": "./src/user-service/index.ts",
+      "import": "./src/user-service/index.ts",
+      "default": "./src/user-service/index.ts"
+    },
+    "./common": {
+      "types": "./src/common/index.ts",
+      "import": "./src/common/index.ts",
+      "default": "./src/common/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@repo/tsconfig-config": "workspace:*",
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.9"
+  }
+}

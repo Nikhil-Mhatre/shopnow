@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  # 1. Database Tier
+  mongodb:
+    image: mongo:latest
+    container_name: local-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Email Interceptor Tier
+  mailpit:
+    image: axllent/mailpit
+    container_name: local-mailpit
+    ports:
+      - "1025:1025" # SMTP Port (User Service talks to this internally)
+      - "8025:8025" # Web UI Port (You view this in browser)
+
+  # 3. Application Tier
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "3001:3001" # Optional: kept open for direct container debugging
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      # Notice we use the container names 'mongodb' and 'mailpit' as hostnames!
+      - MONGO_URI=mongodb://mongodb:27017/ecommerce-users
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+    depends_on:
+      - mongodb
+      - mailpit
+
+  # 4. Gateway Tier
+  api-gateway:
+    image: envoyproxy/envoy:v1.30-latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080" # Main entry point for all frontend traffic
+      - "9901:9901" # Envoy Admin & Telemetry Dashboard
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      - user-service
+
+# Persist database records even if we tear down the containers
+volumes:
+  mongo-data:

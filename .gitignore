@@ -1,0 +1,20 @@
+# / .gitignore
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production Builds & Monorepo Cache
+dist/
+.turbo/
+
+# Global Environment Secrets
+.env
+.env.*
+!.env.example
+
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+*.log

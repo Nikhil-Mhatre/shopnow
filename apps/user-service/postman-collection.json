@@ -1,0 +1,156 @@
+{
+	"info": {
+		"_postman_id": "user-service-collection-v1",
+		"name": "E-Commerce User Service",
+		"description": "API collection for testing Authentication (OTP Lifecycle) and User Profile Management.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "1. Request OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"customer@mystore.com\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/otp-request",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "otp-request"]
+						},
+						"description": "Triggers an initial OTP request. Generates a 6-digit verification code and dispatches it via Mailpit."
+					}
+				},
+				{
+					"name": "2. Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"customer@mystore.com\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/otp-resend",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "otp-resend"]
+						},
+						"description": "Resends a code if the 60-second local cooldown window has expired."
+					}
+				},
+				{
+					"name": "3. Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"JWT_TOKEN\", jsonData.token);",
+									"        console.log(\"Automation: JWT_TOKEN saved successfully.\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"customer@mystore.com\",\n    \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/otp-verify",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "otp-verify"]
+						},
+						"description": "Verifies the 6-digit code. On success, cleans up the database OTP entry, tracks or provisions the User instance, and issues a signature-wrapped RS256 token."
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile Management",
+			"item": [
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{ "key": "token", "value": "{{JWT_TOKEN}}", "type": "string" }
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Alex\",\n    \"lastName\": \"Mercer\",\n    \"phone\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/profile",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "profile"]
+						},
+						"description": "Updates profile variables. Guarded by the `requireAuth` mechanism and strict structural Zod object sizing limits."
+					}
+				},
+				{
+					"name": "Add Address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{ "key": "token", "value": "{{JWT_TOKEN}}", "type": "string" }
+							]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Alex Mercer\",\n    \"street\": \"123 Tech Avenue\",\n    \"city\": \"San Francisco\",\n    \"postalCode\": \"94105\",\n    \"country\": \"USA\",\n    \"phone\": \"+1234567890\",\n    \"isDefault\": true\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/profile/addresses",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "profile", "addresses"]
+						},
+						"description": "Adds a new delivery interface node to the database. Automatically enforces smart-default logic across existing items."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "JWT_TOKEN",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

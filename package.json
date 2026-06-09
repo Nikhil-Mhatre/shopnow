@@ -1,0 +1,24 @@
+{
+  "name": "shopnow",
+  "private": true,
+  "description": "E-Commerce Platform",
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "version-packages": "changeset version"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@repo/tsconfig-config": "workspace:*",
+    "tsx": "^4.19.2",
+    "turbo": "^2.0.14",
+    "typescript": "^5.6.3"
+  }
+}

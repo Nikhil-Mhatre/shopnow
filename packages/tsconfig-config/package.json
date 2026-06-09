@@ -1,0 +1,13 @@
+{
+  "name": "@repo/tsconfig-config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./base.json",
+  "files": [
+    "base.json"
+  ],
+  "exports": {
+    ".": "./base.json",
+    "./base.json": "./base.json"
+  }
+}
